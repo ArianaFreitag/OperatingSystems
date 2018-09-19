@@ -61,7 +61,7 @@ int main(int argc, char *argv[]){
       } else {
         fin = open(inFile, O_RDONLY);
           if (fin < 0) {
-            fprintf(stderr, "Cannot open input file %s for reading: %s\n", outFile, strerror(errno));
+            fprintf(stderr, "Cannot open input file %s for reading: %s\n", inFile, strerror(errno));
             return -1;
           }
       }
