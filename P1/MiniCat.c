@@ -12,7 +12,7 @@ int main(int argc, char *argv[]){
   // initialized variables
   char *inFile;
   char *outFile;
-  int buffSize, opt, inputNum, optindGlobal, fout, fin, cl, rd, wr;
+  int buffSize, opt, inputNum, optindGlobal, fout, fin, cl, rd, wr, left;
   int i;
   buffSize = 4096; // set to standard buffer size if no buffer given
   // take in arguments, set inFile, outFile, and buffSize
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]){
   // number of inputs
   inputNum = argc - optind;
   // create buffer
-  char* buff = malloc(buffSize);
+  char *buff = malloc((sizeof(char))*buffSize);
   // open and create output file for W only
   if (outFile) {
     fout = open(outFile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]){
       printf("standard input used\n");
     }
     // read files and write to output
-    while ((rd = read(fin, buff, sizeof(buff))) > 0) {
+    while ((rd = read(fin, buff, sizeof(char)*buffSize)) > 0) {
       if (rd < 0 ) {
         fprintf(stderr, "Error reading input file %s: %s\n", inFile, strerror(errno));
         return -1;
@@ -81,9 +81,10 @@ int main(int argc, char *argv[]){
             fprintf(stderr, "Error writing to output file %s: %s\n", outFile, strerror(errno));
             return -1;
           } else if (wr < rd) { // fix partial write by keeping track of num bytes written and correcting buff
-             rd = rd - wr;
-             buff = buff + rd;
-             wr = 0;
+            fprintf(stderr, "Partial Write Occured on %s: %s\n", inFile, strerror(errno));
+            rd = rd - wr;
+            buff = buff + rd;
+            wr = 0;
           }
       }
     }
@@ -107,6 +108,5 @@ int main(int argc, char *argv[]){
   clock_t end = clock();
   double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
   printf("Time Spent:%f\n", time_spent);
-  // add in free up memory
   return 0;
 }
