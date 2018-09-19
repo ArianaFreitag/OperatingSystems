@@ -13,7 +13,7 @@ int main(int argc, char *argv[]){
   char *inFile;
   char *outFile;
   int buffSize, opt, inputNum, optindGlobal, fout, fin, cl, rd, wr;
-  int i, n;
+  int i;
   buffSize = 4096; // set to standard buffer size if no buffer given
   // take in arguments, set inFile, outFile, and buffSize
   while ((opt = getopt(argc, argv, "b:o:")) != -1) {
