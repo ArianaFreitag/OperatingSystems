@@ -1,3 +1,8 @@
+/* Ariana Freitag */
+/* ECE-357-Operating-Systems */
+/* Professor Hakner */
+/* Recursive Filesystem Lister in C */
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,9 +30,12 @@ int scanDir(char *directory) {
         fprintf(stderr, "Warning: Cannot open directory %s for reading: %s\n", directory, strerror(errno));
         return -1;
     }
-
     // loop through directory
     while ((entry = readdir(dir)) != NULL) {
+      if (entry == NULL) {
+        fprintf(stderr, "Error reading directory: %s: %s\n", directory, strerror(errno));
+        return -1;
+      }
         // create paths
         snprintf(path, sizeof(path), "%s/%s", directory, entry->d_name);
         if (lstat(path, &st) < 0) {
@@ -81,7 +89,6 @@ int scanDir(char *directory) {
   }
   return 0;
 }
-
 
 int main(int argc, char *argv[]) {
     char *start;
