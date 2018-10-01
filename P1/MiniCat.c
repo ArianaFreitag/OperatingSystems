@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
           if (wr < 0) {
             fprintf(stderr, "Error writing to output file %s: %s\n", outFile, strerror(errno));
             return -1;
-          } else if (wr < rd) { // fix partial write by keeping track of num bytes written and correcting buff
+          } else if (wr < rd) { // partial write check and fix
             fprintf(stderr, "Partial Write Occured on %s: %s\n", inFile, strerror(errno));
             rd = rd - wr;
             buff = buff + rd;
