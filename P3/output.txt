@@ -1,0 +1,12 @@
+err.txt
+error.txt
+input.txt
+out.txt
+output.txt
+shell
+shell.c
+stderr.txt
+testdir
+meow
+I have a cat named Bunny.
+If you haven't realized yet I love cats!!!

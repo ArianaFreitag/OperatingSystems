@@ -17,7 +17,6 @@
 #include <time.h>
 
 int scanDir(char *directory) {
-
     DIR *dir;
     struct dirent *entry;
     struct stat st;
@@ -30,12 +29,13 @@ int scanDir(char *directory) {
         fprintf(stderr, "Warning: Cannot open directory %s for reading: %s\n", directory, strerror(errno));
         return -1;
     }
+    // check for errors with reading directory
+    if (readdir(dir) == NULL) {
+      fprintf(stderr, "Error reading directory: %s: %s\n", directory, strerror(errno));
+      return -1;
+    }
     // loop through directory
     while ((entry = readdir(dir)) != NULL) {
-      if (entry == NULL) {
-        fprintf(stderr, "Error reading directory: %s: %s\n", directory, strerror(errno));
-        return -1;
-      }
         // create paths
         snprintf(path, sizeof(path), "%s/%s", directory, entry->d_name);
         if (lstat(path, &st) < 0) {
