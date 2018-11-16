@@ -1,5 +1,7 @@
 // Ariana Freitag Problem Set 4
 // catgrepmore: Using pipes and handling signals
+// Note: Testing worked for file sizes of 140 kb
+// Note: Testing failed for file size of 3.4 mb
 
 #include <signal.h>
 #include <stdio.h>
@@ -12,7 +14,6 @@
 #include <sys/signal.h>
 
 struct sigaction sigact;
-struct rusage usage;
 int totalBytes = 0;
 int totalFiles = 0;
 int signo;
@@ -23,7 +24,6 @@ void handler(s) {
     exit(EXIT_FAILURE);
   }
 }
-
 
 int main(int argc, char *argv[]) {
   // parse commands
@@ -42,27 +42,21 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   signal(SIGPIPE, SIG_IGN);
-
   buffSize = 4096;
   char *buff = malloc((sizeof(char))*buffSize);
-  if (buff == -1){
+  if (buff == NULL) {
     fprintf(stderr, "Malloc failed:%s\n", strerror(errno));
     return -1;
   }
-
   // check to make sure enough arguments
-  if (argc != 3) {
+  if (argc < 3) {
     fprintf(stderr, "Not enough arguments\n");
     return -1;
   }
   // set pattern
   pattern = argv[1];
-
-  for (i = 0; i < argc - 2; i++) {
-
+  for (i = 0; i < argc - 2; i++) { // loop through input files
     int pipeGrep[2], pipeMore[2];
-
-
     if (pipe(pipeGrep) == -1) {
       fprintf(stderr, "Creation of grep pipe failed:%s\n", strerror(errno));
       return -1;
@@ -78,6 +72,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "redirection of pipeMore stdin failed:%s\n", strerror(errno));
         return -1;
       }
+      // make sure to close all fd
       close(pipeGrep[0]);
       close(pipeGrep[1]);
       close(pipeMore[0]);
@@ -90,6 +85,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "fork failed: %s\n", strerror(errno));
       return -1;
     }
+    printf("here!!!\n");
     pidGrep = fork();
     if (pidGrep == 0) { // child grep
       if (dup2(pipeGrep[0],STDIN_FILENO) == -1) {
@@ -100,6 +96,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "redirection of pipeGrep stdout failed:%s\n", strerror(errno));
         return -1;
       }
+      // make sure to close all fd
       close(pipeGrep[0]);
       close(pipeGrep[1]);
       close(pipeMore[0]);
@@ -112,7 +109,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "fork failed: %s\n", strerror(errno));
       return -1;
     }
-
+    // get file
     inFile = argv[2+i];
     if (strcmp("-", inFile) == 0) {
       fin = 0; // set to standard input
@@ -124,13 +121,12 @@ int main(int argc, char *argv[]) {
         }
     }
     totalFiles++;
-
+    // perform cat
     while ((rd = read(fin, buff, sizeof(char)*buffSize)) > 0) {
       if (rd < 0 ) {
         fprintf(stderr, "Error reading input file %s: %s\n", inFile, strerror(errno));
         return -1;
       } else {
-        // write
         wr = write(pipeGrep[1], buff, rd);
           if (wr < 0) {
             fprintf(stderr, "Error writing to output pipe: %s\n", strerror(errno));
@@ -153,6 +149,7 @@ int main(int argc, char *argv[]) {
     close(pipeMore[1]);
     wait(0);
     wait(0);
+    free(buff);
   }
   return 0;
 }
