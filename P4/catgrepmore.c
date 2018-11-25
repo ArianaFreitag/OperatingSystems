@@ -85,7 +85,6 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "fork failed: %s\n", strerror(errno));
       return -1;
     }
-    printf("here!!!\n");
     pidGrep = fork();
     if (pidGrep == 0) { // child grep
       if (dup2(pipeGrep[0],STDIN_FILENO) == -1) {
