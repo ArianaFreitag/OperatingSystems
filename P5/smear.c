@@ -44,7 +44,7 @@ void replace(void *start, char *target, char *replacement, int size) {
 }
 
 int main(int argc, char *argv[]) {
-    char *targ, rep, inFile;
+    char *targ, *rep, *inFile;
     void *map;
     int fin, cl, unmap, size;
     int i = 0;
