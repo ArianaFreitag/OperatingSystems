@@ -20,6 +20,7 @@ int errCheck(int returnVal, char *message) {
 off_t fileSize(int file) {
     struct stat st;
     int fileInfo = fstat(file, &st);
+
     if (fileInfo == 0) {
         return st.st_size;
     } else {
@@ -28,24 +29,24 @@ off_t fileSize(int file) {
     }
 }
 
-void replace(void *str, char *target, char *replacement, int size) {
-    int len, len2;
+void replace(void *start, char *target, char *replacement, int size) {
     void *pos;
-    len = strlen(replacement);
-    len2 = strlen(target);
-    while ((pos = memmem(str, size, target, len2))) {
-        memcpy(str, replacement, len);
-        size -= labs(str - pos);
-        str = pos;
+    int len = strlen(replacement);
+    int len2 = strlen(target);
+
+    while ((pos = memmem(start, size, target, len2))) {
+        // copy replacement into original map
+        memcpy(start, replacement, len);
+        // reset size of file
+        size -= labs(start - pos);
+        start = pos;
     }
 }
 
 int main(int argc, char *argv[]) {
-    char *targ;
-    char *rep;
-    char *inFile;
+    char *targ, rep, inFile;
     void *map;
-    int fin, cl, unmap, size, sync;
+    int fin, cl, unmap, size;
     int i = 0;
 
     if (argc < 4) {
@@ -61,14 +62,18 @@ int main(int argc, char *argv[]) {
         fin = open(inFile, O_RDWR);
         errCheck(fin, "unable to open input file for reading and writing");
         size = fileSize(fin);
+        // set up memory mapping
         map = mmap(0, size, PROT_READ|PROT_WRITE, MAP_SHARED, fin, 0);
         if (map == MAP_FAILED) {
             fprintf(stderr, "map failed:%s\n", strerror(errno));
             return -1;
         }
+        // call find and replace function
         replace(map, targ, rep, size);
+        // unmap memory
         unmap = munmap(map, size);
         errCheck(unmap, "error unmapping memory map");
+        // close
         cl = close(fin);
         errCheck(cl, "error closing file");
     }
