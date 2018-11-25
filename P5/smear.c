@@ -1,3 +1,8 @@
+/* Ariana Freitag */
+/* ECE-357-Operating-Systems */
+/* Professor Hakner */
+/* Find and Replace Using mmap */
+
 #include <sys/mman.h>
 #include <stdio.h>
 #include <fcntl.h>
